@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import sequelize from './config/database';
 import './models'; // initialize associations
 
@@ -22,6 +23,13 @@ app.use('/api/updates', updateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Serve React frontend in production
+const frontendBuild = path.join(__dirname, '..', 'frontend', 'build');
+app.use(express.static(frontendBuild));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendBuild, 'index.html'));
+});
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
