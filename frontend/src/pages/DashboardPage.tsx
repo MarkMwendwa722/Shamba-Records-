@@ -298,34 +298,33 @@ export default function DashboardPage() {
             <Link to="/fields" style={S.seeAll}>See All</Link>
           </div>
           {data.atRiskFields.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={S.table}>
-                <thead>
-                  <tr>
-                    {['Field', 'Crop', 'Stage', 'Status', 'Why'].map((h) => (
-                      <th key={h} style={S.th}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.atRiskFields.map((field: Field) => (
-                    <tr key={field.id}>
-                      <td style={S.td}>
-                        <Link to={`/fields/${field.id}`} style={{ fontWeight: 600, color: theme.text, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={S.fieldThumb} />
-                          {field.name}
-                        </Link>
-                      </td>
-                      <td style={S.td}>{field.cropType}</td>
-                      <td style={S.td}><StageBadge stage={field.stage} /></td>
-                      <td style={S.td}><StatusBadge status={field.status} /></td>
-                      <td style={{ ...S.td, fontSize: '0.78rem', color: '#dc2626', maxWidth: 200 }}>
-                        {field.riskReason ?? '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {data.atRiskFields.map((field: Field) => (
+                <Link
+                  key={field.id}
+                  to={`/fields/${field.id}`}
+                  style={{
+                    display: 'flex', flexDirection: 'column', gap: '0.35rem',
+                    padding: '0.75rem', borderRadius: 8, textDecoration: 'none',
+                    background: theme.isDark ? '#1f1010' : '#fff5f5',
+                    border: `1px solid ${theme.isDark ? '#3d1a1a' : '#fecaca'}`,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' as const }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: theme.text }}>{field.name}</span>
+                    <span style={{ fontSize: '0.78rem', color: theme.textMuted }}>{field.cropType}</span>
+                    <span style={{ marginLeft: 'auto', display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' as const }}>
+                      <StageBadge stage={field.stage} />
+                      <StatusBadge status={field.status} />
+                    </span>
+                  </div>
+                  {field.riskReason && (
+                    <div style={{ fontSize: '0.78rem', color: '#dc2626', lineHeight: 1.5 }}>
+                      ⚠ {field.riskReason}
+                    </div>
+                  )}
+                </Link>
+              ))}
             </div>
           ) : (
             <p style={S.empty}>No fields need attention — all looking healthy!</p>
