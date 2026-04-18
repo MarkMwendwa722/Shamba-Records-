@@ -37,6 +37,7 @@ export interface Field {
   plantingDate: string;
   stage: Stage;
   status: FieldStatus;
+  riskReason?: string | null;
   location: string | null;
   sizeHectares: number | null;
   assignedAgentId: number | null;

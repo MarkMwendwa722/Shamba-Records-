@@ -77,7 +77,7 @@ router.post('/', authenticate, async (req: Request, res: Response): Promise<void
         // If the updated field is now At Risk, send a separate alert
         const updatedField = await Field.findByPk(fieldId);
         if (updatedField) {
-          const status = computeFieldStatus(updatedField.toJSON() as FieldJSON);
+          const { status } = computeFieldStatus(updatedField.toJSON() as FieldJSON);
           if (status === 'At Risk') {
             sendToUsers(adminIds, makeNotification(
               'at_risk',

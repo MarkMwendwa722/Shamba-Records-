@@ -23,7 +23,8 @@ router.get('/', authenticate, async (req: Request, res: Response): Promise<void>
 
     const fieldsWithStatus = fields.map((f) => {
       const plain = f.toJSON() as FieldJSON;
-      return { ...plain, status: computeFieldStatus(plain) };
+      const { status, reason } = computeFieldStatus(plain);
+      return { ...plain, status, riskReason: reason };
     });
 
     const totalFields = fieldsWithStatus.length;

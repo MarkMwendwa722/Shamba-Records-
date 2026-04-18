@@ -288,10 +288,13 @@ export default function DashboardPage() {
 
       {/* Bottom — 2 columns */}
       <div style={S.bottomGrid}>
-        {/* Field Status Table */}
-        <div style={S.card}>
+        {/* Fields Needing Attention */}
+        <div style={{ ...S.card, borderLeft: '4px solid #ef4444' }}>
           <div style={S.cardHeader}>
-            <h3 style={S.cardTitle}>Field Status</h3>
+            <h3 style={{ ...S.cardTitle, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertTriangle size={16} color="#ef4444" />
+              Fields Needing Attention
+            </h3>
             <Link to="/fields" style={S.seeAll}>See All</Link>
           </div>
           {data.atRiskFields.length > 0 ? (
@@ -299,7 +302,7 @@ export default function DashboardPage() {
               <table style={S.table}>
                 <thead>
                   <tr>
-                    {['Field', 'Crop', 'Stage', 'Health'].map((h) => (
+                    {['Field', 'Crop', 'Stage', 'Status', 'Why'].map((h) => (
                       <th key={h} style={S.th}>{h}</th>
                     ))}
                   </tr>
@@ -316,13 +319,16 @@ export default function DashboardPage() {
                       <td style={S.td}>{field.cropType}</td>
                       <td style={S.td}><StageBadge stage={field.stage} /></td>
                       <td style={S.td}><StatusBadge status={field.status} /></td>
+                      <td style={{ ...S.td, fontSize: '0.78rem', color: '#dc2626', maxWidth: 200 }}>
+                        {field.riskReason ?? '—'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p style={S.empty}>No at-risk fields — all looking healthy!</p>
+            <p style={S.empty}>No fields need attention — all looking healthy!</p>
           )}
         </div>
 

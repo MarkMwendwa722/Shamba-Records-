@@ -7,9 +7,10 @@ import type { FieldJSON } from '../types/models';
 
 const router = Router();
 
-const withStatus = (field: Field): FieldJSON & { status: ReturnType<typeof computeFieldStatus> } => {
+const withStatus = (field: Field): FieldJSON & { status: ReturnType<typeof computeFieldStatus>['status']; riskReason: string | null } => {
   const plain = field.toJSON() as FieldJSON;
-  return { ...plain, status: computeFieldStatus(plain) };
+  const { status, reason } = computeFieldStatus(plain);
+  return { ...plain, status, riskReason: reason };
 };
 
 // GET /api/fields
