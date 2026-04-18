@@ -13,15 +13,16 @@ async function seed(): Promise<void> {
   const agent2 = await User.create({ name: 'Brian Omondi', email: 'brian@smartseason.com', password: agentPass, role: 'agent' });
 
   const now = new Date();
-  const daysAgo = (n: number): Date => new Date(now.getTime() - n * 24 * 60 * 60 * 1000);
+  const dateStrAgo = (n: number): string => new Date(now.getTime() - n * 86400000).toISOString().split('T')[0];
+  const dateAgo    = (n: number): Date   => new Date(now.getTime() - n * 86400000);
 
   await Field.bulkCreate([
-    { name: 'North Paddock', cropType: 'Maize', plantingDate: daysAgo(45), stage: 'Growing', assignedAgentId: agent1.id, lastObservationDate: daysAgo(3) },
-    { name: 'South Block', cropType: 'Wheat', plantingDate: daysAgo(120), stage: 'Ready', assignedAgentId: agent1.id, lastObservationDate: daysAgo(1) },
-    { name: 'East Ridge', cropType: 'Beans', plantingDate: daysAgo(200), stage: 'Harvested', assignedAgentId: agent2.id, lastObservationDate: daysAgo(10) },
-    { name: 'West Lot', cropType: 'Sorghum', plantingDate: daysAgo(30), stage: 'Planted', assignedAgentId: agent2.id, lastObservationDate: daysAgo(20) },
-    { name: 'Greenhouse A', cropType: 'Tomatoes', plantingDate: daysAgo(10), stage: 'Growing', assignedAgentId: agent1.id, lastObservationDate: daysAgo(2) },
-    { name: 'Highland Field', cropType: 'Potatoes', plantingDate: daysAgo(95), stage: 'Planted', assignedAgentId: null, lastObservationDate: null },
+    { name: 'North Paddock',  cropType: 'Maize',    plantingDate: dateStrAgo(45),  stage: 'Growing',   assignedAgentId: agent1.id, lastObservationDate: dateAgo(3)  },
+    { name: 'South Block',    cropType: 'Wheat',    plantingDate: dateStrAgo(120), stage: 'Ready',     assignedAgentId: agent1.id, lastObservationDate: dateAgo(1)  },
+    { name: 'East Ridge',     cropType: 'Beans',    plantingDate: dateStrAgo(200), stage: 'Harvested', assignedAgentId: agent2.id, lastObservationDate: dateAgo(10) },
+    { name: 'West Lot',       cropType: 'Sorghum',  plantingDate: dateStrAgo(30),  stage: 'Planted',   assignedAgentId: agent2.id, lastObservationDate: dateAgo(20) },
+    { name: 'Greenhouse A',   cropType: 'Tomatoes', plantingDate: dateStrAgo(10),  stage: 'Growing',   assignedAgentId: agent1.id, lastObservationDate: dateAgo(2)  },
+    { name: 'Highland Field', cropType: 'Potatoes', plantingDate: dateStrAgo(95),  stage: 'Planted',   assignedAgentId: null,      lastObservationDate: null        },
   ]);
 
   console.log('Database seeded successfully!');
