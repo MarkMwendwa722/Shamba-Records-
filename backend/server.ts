@@ -12,6 +12,7 @@ import userRoutes from './routes/users';
 import fieldRoutes from './routes/fields';
 import updateRoutes from './routes/updates';
 import dashboardRoutes from './routes/dashboard';
+import notificationRoutes from './routes/notifications';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/fields', fieldRoutes);
 app.use('/api/updates', updateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

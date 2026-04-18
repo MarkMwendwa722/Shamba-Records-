@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Field, User, Update } from '../models';
 import { authenticate, requireAdmin } from '../middleware/auth';
 import { computeFieldStatus } from '../utils/statusLogic';
+import { sendToUsers, makeNotification } from '../utils/notificationBus';
 import type { FieldJSON } from '../types/models';
 
 const router = Router();
@@ -98,6 +99,18 @@ router.post('/', authenticate, requireAdmin, async (req: Request, res: Response)
     });
 
     res.status(201).json(withStatus(fullField!));
+
+    // Notify the assigned agent (fire-and-forget)
+    if (assignedAgentId) {
+      setImmediate(() => {
+        sendToUsers([assignedAgentId], makeNotification(
+          'assignment',
+          'Field Assigned to You',
+          `You have been assigned to "${name}" (${cropType})`,
+          field.id,
+        ));
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: (err as Error).message });
   }
@@ -123,6 +136,8 @@ router.put('/:id', authenticate, requireAdmin, async (req: Request, res: Respons
         assignedAgentId: number | null;
       }>;
 
+    const previousAgentId = field.assignedAgentId;
+
     await field.update({ name, cropType, plantingDate, stage, location, sizeHectares, assignedAgentId });
 
     const fullField = await Field.findByPk(field.id, {
@@ -130,6 +145,22 @@ router.put('/:id', authenticate, requireAdmin, async (req: Request, res: Respons
     });
 
     res.json(withStatus(fullField!));
+
+    // Notify newly assigned agent (fire-and-forget)
+    if (
+      assignedAgentId !== undefined &&
+      assignedAgentId !== null &&
+      assignedAgentId !== previousAgentId
+    ) {
+      setImmediate(() => {
+        sendToUsers([assignedAgentId!], makeNotification(
+          'assignment',
+          'Field Assigned to You',
+          `You have been assigned to "${field.name}" (${field.cropType})`,
+          field.id,
+        ));
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: (err as Error).message });
   }

@@ -1,6 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Update, Field, User } from '../models';
 import { authenticate } from '../middleware/auth';
+import { sendToUsers, makeNotification } from '../utils/notificationBus';
+import { computeFieldStatus } from '../utils/statusLogic';
+import type { FieldJSON } from '../types/models';
 
 const router = Router();
 
@@ -45,6 +48,47 @@ router.post('/', authenticate, async (req: Request, res: Response): Promise<void
     });
 
     res.status(201).json(fullUpdate);
+
+    // --- Real-time notifications (fire-and-forget) ---
+    setImmediate(async () => {
+      try {
+        const admins = await User.findAll({ where: { role: 'admin' }, attributes: ['id'] });
+        const adminIds = admins.map((a) => a.id);
+        const agentName = req.user!.name;
+
+        // Notify admins about the new observation
+        sendToUsers(adminIds, makeNotification(
+          'observation',
+          'New Observation Logged',
+          `${agentName} updated "${field.name}" → ${newStage}`,
+          fieldId,
+        ));
+
+        // Notify the assigned agent if someone else posted the update
+        if (field.assignedAgentId && field.assignedAgentId !== req.user!.id) {
+          sendToUsers([field.assignedAgentId], makeNotification(
+            'observation',
+            'Your Field Was Updated',
+            `"${field.name}" stage changed to ${newStage} by ${agentName}`,
+            fieldId,
+          ));
+        }
+
+        // If the updated field is now At Risk, send a separate alert
+        const updatedField = await Field.findByPk(fieldId);
+        if (updatedField) {
+          const status = computeFieldStatus(updatedField.toJSON() as FieldJSON);
+          if (status === 'At Risk') {
+            sendToUsers(adminIds, makeNotification(
+              'at_risk',
+              'Field At Risk',
+              `"${field.name}" (${field.cropType}) is now At Risk`,
+              fieldId,
+            ));
+          }
+        }
+      } catch { /* notifications are best-effort */ }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: (err as Error).message });
   }
